@@ -29,7 +29,7 @@ void init()
     std::filesystem::path dir = base + "/ledger";
     std::filesystem::create_directories(dir);
 
-    std::filesystem::path file = dir / "config.json";
+    std::filesystem::path file = dir / "ledger.state";
     std::ofstream out(file);
 
     if (!out)
@@ -38,7 +38,7 @@ void init()
         return;
     }
 
-    out << "{ \"status\": \"initialized\" }\n";
+    out << "rank=1\nxp=0\nfocus=0";
 }
 
 int main(int argc, char *argv[])
