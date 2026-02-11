@@ -27,12 +27,12 @@ This is **not** a product and does not need to scale.
 ## Current State
 - `ledger` binary compiles and runs
 - Command routing works (`init`, `status`)
-- No persistence implemented yet
-- No JSON parsing yet
+- `init` creates state file at `~/.config/ledger/`
+- Determining state file format and contents
 
 ## Constraints
 - No web, no UI, no daemon
-- One local state file
+- One local state file (format TBD)
 - No external libraries unless pain appears
 - Completion > elegance
 
