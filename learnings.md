@@ -1,4 +1,4 @@
-# Ledger — Learning Log
+# Ledger Learning Log
 
 Things learned while building this project.
 
