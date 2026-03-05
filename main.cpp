@@ -30,6 +30,13 @@ void init()
     std::filesystem::create_directories(dir);
 
     std::filesystem::path file = dir / "ledger.state";
+
+    if (std::filesystem::exists(file))
+    {
+        std::cout << "Ledger already initialized.\n";
+        return;
+    }
+
     std::ofstream out(file);
 
     if (!out)
@@ -38,7 +45,8 @@ void init()
         return;
     }
 
-    out << "rank=1\nxp=0\nfocus=0";
+    out << "Rank=1\nXP=0\nFocus=0\nItems=0\n";
+    std::cout << "Ledger initialised successfully.\n";
 }
 
 int main(int argc, char *argv[])
