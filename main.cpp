@@ -33,6 +33,13 @@ bool load_state(int *rank, int *xp, int *focus, int *items)
 
     std::string line;
 
+    // handling case if anything is not initialised
+    // idk why this will happen but just in case :)
+    *rank = -1;
+    *xp = -1;
+    *focus = -1;
+    *items = -1;
+
     while (std::getline(in, line))
     {
         size_t pos = line.find('=');
@@ -55,21 +62,23 @@ bool load_state(int *rank, int *xp, int *focus, int *items)
     return true;
 }
 
+std::filesystem::path state_path()
+{
+    std::string base = get_config_home();
+    if (base.empty())
+        return {};
+
+    std::filesystem::path dir = std::filesystem::path(base) / "ledger";
+    std::filesystem::create_directories(dir);
+
+    return dir / "ledger.state";
+}
+
 void init()
 {
     std::cout << "Initialising ledger...\n";
 
-    std::string base = get_config_home();
-    if (base.empty())
-    {
-        std::cerr << "Cannot determine config directory\n";
-        return;
-    }
-
-    std::filesystem::path dir = base + "/ledger";
-    std::filesystem::create_directories(dir);
-
-    std::filesystem::path file = dir / "ledger.state";
+    std::filesystem::path file = state_path();
 
     if (std::filesystem::exists(file))
     {
@@ -89,12 +98,14 @@ void init()
     std::cout << "Ledger initialised successfully.\n";
 }
 
-void status(){
+void status()
+{
     int rank, xp, focus, items;
 
     if (!load_state(&rank, &xp, &focus, &items))
     {
-        std::cout << "Ledger not initialised!\nTry `ledger init`";
+        std::cout << "Ledger not initialised!\n";
+        std::cout << "Run `ledger init` first.\n";
         return;
     }
 
@@ -106,6 +117,21 @@ void status(){
     std::cout << " Focus  : " << focus << "\n";
     std::cout << " Items  : " << items << "\n";
     std::cout << "---------------------------\n";
+}
+
+void log(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        std::cerr << "ledger: missing log entry\n";
+        std::cerr << "usage: ledger log \"activity 25m\"\n";
+        return;
+    }
+    else if (argc > 3)
+    {
+        std::cerr << "too many actvities. please log one at a time.\n";
+    }
+    std::string entry = argv[2];
 }
 
 int main(int argc, char *argv[])
@@ -123,6 +149,8 @@ int main(int argc, char *argv[])
         init();
     else if (cmd == "status")
         status();
+    else if (cmd == "log")
+        log(argc, argv);
     else
         std::cout << "ledger: unknown command `" << cmd << "`\n";
 
