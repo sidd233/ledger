@@ -39,7 +39,7 @@ items=0
 
 ## 1.6 Confirm Initialization
 
-- [ ] Print confirmation message
+- [x] Print confirmation message
 
 ```
 Ledger initialized.
@@ -51,18 +51,18 @@ Ledger initialized.
 
 ## 2.1 Define State Variables
 
-- [ ] `int rank`
-- [ ] `int xp`
-- [ ] `int focus`
-- [ ] `int items`
+- [x] `int rank`
+- [x] `int xp`
+- [x] `int focus`
+- [x] `int items`
 
 ## 2.2 Implement State Loader
 
-- [ ] Open `ledger.state`
-- [ ] Read file line-by-line
-- [ ] Split line into `key=value`
-- [ ] Convert value to integer
-- [ ] Assign to corresponding variable
+- [x] Open `ledger.state`
+- [x] Read file line-by-line
+- [x] Split line into `key=value`
+- [x] Convert value to integer
+- [x] Assign to corresponding variable
 
 ## 2.3 Implement State Writer
 
@@ -77,24 +77,24 @@ Ledger initialized.
 
 ## 3.1 Detect Initialization
 
-- [ ] Check if state file exists
-- [ ] If not:
+- [x] Check if state file exists
+- [x] If not:
 
-  - [ ] Print "Ledger not initialized"
-  - [ ] Suggest running `ledger init`
-  - [ ] Exit
+  - [x] Print "Ledger not initialized"
+  - [x] Suggest running `ledger init`
+  - [x] Exit
 
 ## 3.2 Load State
 
-- [ ] Call state loader
-- [ ] Populate rank/xp/focus/items variables
+- [x] Call state loader
+- [x] Populate rank/xp/focus/items variables
 
 ## 3.3 Print Status
 
-- [ ] Print rank
-- [ ] Print xp
-- [ ] Print focus
-- [ ] Print items
+- [x] Print rank
+- [x] Print xp
+- [x] Print focus
+- [x] Print items
 
 Example output:
 
