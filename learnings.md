@@ -259,7 +259,7 @@ fs::create_directories(dir);
 fs::path file = dir / "ledger.state";
 
 std::ofstream out(file);
-out << "Rank=1\nXP=0\nFocus=0\nItems=0\n";
+out << "Rank=1\nXP=0\nFocus=0\n";
 ```
 
 Mental model:
@@ -337,7 +337,6 @@ Ledger state uses the format:
 Rank=1
 XP=0
 Focus=0
-Items=0
 ```
 
 Each line must be split into key and value.
@@ -378,7 +377,6 @@ Example mapping:
 if (key == "Rank") rank = value;
 else if (key == "XP") xp = value;
 else if (key == "Focus") focus = value;
-else if (key == "Items") items = value;
 ```
 
 ---

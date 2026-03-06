@@ -9,9 +9,7 @@ The goal is consistency, not optimization.
 
 - Terminal-first CLI
 - Local, offline data storage
-- Progress, ranks, and attributes
-- Simple item-based modifiers
-- No accounts, no cloud, no UI
+- Rank, XP, and Focus tracking
 
 ## Usage
 
@@ -19,7 +17,7 @@ The goal is consistency, not optimization.
 ledger init
 ledger log "coding 25m"
 ledger status
-ledger items
+ledger reset
 ```
 
 ## Design Principles
@@ -34,14 +32,16 @@ ledger items
 Build from source:
 
 ```bash
-g++ -std=c++20 main.cpp -o ledger && ./ledger
+g++ -std=c++20 main.cpp -o ledger
+```
+
+Place the binary somewhere on your `$PATH`, e.g.:
+
+```bash
+cp ledger ~/.local/bin/ledger
 ```
 
 ## Data
 
-All data is stored locally in a single file created during initialization.
+All data is stored locally in a single plain-text file at `~/.config/ledger/ledger.state`.
 No network access is used.
-
-## Status
-
-This is a small, self-contained side project intended for personal use.
