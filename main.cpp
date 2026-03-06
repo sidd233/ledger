@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <filesystem>
 #include <cmath>
+#include <iomanip>
+#include <sstream>
 
 std::string get_config_home()
 {
@@ -28,14 +30,9 @@ std::filesystem::path state_path()
     return dir / "ledger.state";
 }
 
-bool load_state(int *rank, int *xp, int *focus, int *items)
+bool load_state(int *rank, int *xp, int *focus)
 {
-    std::string base = get_config_home();
-    if (base.empty())
-        return false;
-
-    std::filesystem::path dir = std::filesystem::path(base) / "ledger";
-    std::filesystem::path file = dir / "ledger.state";
+    std::filesystem::path file = state_path();
 
     if (!std::filesystem::exists(file))
         return false;
@@ -46,12 +43,9 @@ bool load_state(int *rank, int *xp, int *focus, int *items)
 
     std::string line;
 
-    // handling case if anything is not initialised
-    // idk why this will happen but just in case :)
     *rank = -1;
     *xp = -1;
     *focus = -1;
-    *items = -1;
 
     while (std::getline(in, line))
     {
@@ -68,18 +62,15 @@ bool load_state(int *rank, int *xp, int *focus, int *items)
             *xp = value;
         else if (key == "Focus")
             *focus = value;
-        else if (key == "Items")
-            *items = value;
     }
 
     return true;
 }
 
-void write_state(int rank, int xp, int focus, int items)
+void write_state(int rank, int xp, int focus)
 {
-    std::filesystem::path file = state_path();
+    std::ofstream out(state_path());
 
-    std::ofstream out(file);
     if (!out)
     {
         std::cerr << "Failed to write state file\n";
@@ -89,7 +80,11 @@ void write_state(int rank, int xp, int focus, int items)
     out << "Rank=" << rank << "\n";
     out << "XP=" << xp << "\n";
     out << "Focus=" << focus << "\n";
-    out << "Items=" << items << "\n";
+}
+
+int xp_required(int rank)
+{
+    return 50 * rank * rank;
 }
 
 void init()
@@ -112,29 +107,66 @@ void init()
         return;
     }
 
-    out << "Rank=1\nXP=0\nFocus=0\nItems=0\n";
+    out << "Rank=1\nXP=0\nFocus=0\n";
+
     std::cout << "Ledger initialised successfully.\n";
+}
+
+void print_row(const std::string &text)
+{
+    const int width = 28;
+    std::cout << "║ " << std::left << std::setw(width) << text << " ║\n";
 }
 
 void status()
 {
-    int rank, xp, focus, items;
+    int rank, xp, focus;
 
-    if (!load_state(&rank, &xp, &focus, &items))
+    if (!load_state(&rank, &xp, &focus))
     {
         std::cout << "Ledger not initialised!\n";
         std::cout << "Run `ledger init` first.\n";
         return;
     }
 
-    std::cout << "---------------------------\n";
-    std::cout << "        LEDGER STATUS      \n";
-    std::cout << "---------------------------\n";
-    std::cout << " Rank   : " << rank << "\n";
-    std::cout << " XP     : " << xp << "\n";
-    std::cout << " Focus  : " << focus << "\n";
-    std::cout << " Items  : " << items << "\n";
-    std::cout << "---------------------------\n";
+    int xp_needed = xp_required(rank);
+    float progress = (float)xp / xp_needed;
+
+    if (progress < 0)
+        progress = 0;
+    if (progress > 1)
+        progress = 1;
+
+    const int bar_width = 16;
+    int filled = progress * bar_width;
+
+    std::string bar;
+
+    for (int i = 0; i < bar_width; i++)
+        bar += (i < filled ? '#' : '-');
+
+    std::ostringstream progress_text;
+    progress_text << "[" << bar << "] "
+                  << int(progress * 100) << "%";
+
+    std::ostringstream xp_text;
+    xp_text << xp << " / " << xp_needed << " XP";
+
+    std::cout << "\n";
+    std::cout << "╔══════════════════════════════╗\n";
+    print_row("LEDGER STATUS");
+    std::cout << "╠══════════════════════════════╣\n";
+
+    print_row("Rank   : " + std::to_string(rank));
+    print_row("XP     : " + std::to_string(xp));
+    print_row("Focus  : " + std::to_string(focus));
+    print_row("");
+
+    print_row("Level Progress");
+    print_row(progress_text.str());
+    print_row(xp_text.str());
+
+    std::cout << "╚══════════════════════════════╝\n";
 }
 
 void log(int argc, char *argv[])
@@ -145,14 +177,11 @@ void log(int argc, char *argv[])
         std::cerr << "usage: ledger log \"activity 25m\"\n";
         return;
     }
-    else if (argc > 3)
-    {
-        std::cerr << "too many actvities. please log one at a time.\n";
-    }
 
     std::string entry = argv[2];
 
     size_t pos = entry.find(' ');
+
     if (pos == std::string::npos)
     {
         std::cerr << "Invalid log entry format\n";
@@ -161,33 +190,57 @@ void log(int argc, char *argv[])
     }
 
     std::string act = entry.substr(0, pos);
-    int value = std::stoi(entry.substr(pos + 1, -1));
-    char unit = entry.back();
+
+    std::string time = entry.substr(pos + 1);
+
+    char unit = time.back();
+
+    int value = std::stoi(time.substr(0, time.size() - 1));
+
     if (unit == 'm')
-    {
-        value = value * 60; // convert minutes to seconds
-    }
+        value *= 60;
     else if (unit == 'h')
-    {
-        value = value * 3600; // convert hours to seconds
-    }
+        value *= 3600;
     else if (unit != 's')
     {
-        std::cerr << "Invalid time unit. Use 's' for seconds, 'm' for minutes, or 'h' for hours.\n";
+        std::cerr << "Invalid time unit. Use s, m, or h.\n";
         return;
     }
 
-    int rank, xp, focus, items;
-    if (!load_state(&rank, &xp, &focus, &items))
+    int rank, xp, focus;
+
+    if (!load_state(&rank, &xp, &focus))
     {
         std::cerr << "Ledger not initialised!\n";
         std::cerr << "Run `ledger init` first.\n";
         return;
     }
-    xp += value;
-    rank = 1 + floor(sqrt(xp / 50));
-    write_state(rank, xp, focus, items);
-    std::cout << "Logged activity: " << act << " for " << value << " seconds.\n";
+
+    int gained_xp = value / 10; // scale XP
+    int gained_focus = value / 60;
+
+    xp += gained_xp;
+    focus += gained_focus;
+
+    while (xp >= xp_required(rank))
+    {
+        xp -= xp_required(rank);
+        rank++;
+
+        std::cout << "★ LEVEL UP! You reached Rank "
+                  << rank << " ★\n";
+    }
+
+    write_state(rank, xp, focus);
+
+    std::cout << "Logged: " << act
+              << " for " << value << " seconds.\n";
+}
+
+void reset()
+{
+    write_state(1, 0, 0);
+    std::cout << "Ledger reset successfully.\n";
 }
 
 int main(int argc, char *argv[])
@@ -205,6 +258,8 @@ int main(int argc, char *argv[])
         init();
     else if (cmd == "status")
         status();
+    else if (cmd == "reset")
+        reset();
     else if (cmd == "log")
         log(argc, argv);
     else

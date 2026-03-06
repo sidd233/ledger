@@ -155,14 +155,14 @@ Tasks:
 Example:
 
 ```
-rank = 1 + xp / 100
+1 + floor(sqrt(xp / 100.0))
 ```
 
-- [ ] Recalculate rank
+- [x] Recalculate rank
 
 ## 4.7 Update Focus
 
-- [ ] Increase focus by minutes
+- [x] Increase focus by minutes
 
 ```
 focus += minutes
@@ -170,7 +170,7 @@ focus += minutes
 
 ## 4.8 Save Updated State
 
-- [ ] Write updated values to file
+- [x] Write updated values to file
 
 ## 4.9 Confirm Log
 
@@ -179,28 +179,6 @@ Example output:
 ```
 Logged: coding (25m)
 ```
-
----
-
-# 5. Items Command
-
-## 5.1 Verify Initialization
-
-- [ ] Check state file exists
-- [ ] Exit if missing
-
-## 5.2 Load State
-
-- [ ] Load `items` variable
-
-## 5.3 Print Items
-
-Example output:
-
-```
-Items: 0
-```
-
 ---
 
 # 6. Command Router
