@@ -111,8 +111,8 @@ Items: 0
 
 ## 4.1 Command Argument Handling
 
-- [ ] Ensure `argc >= 3`
-- [ ] Extract log string from `argv[2]`
+- [x] Ensure `argc >= 3`
+- [x] Extract log string from `argv[2]`
 
 ## 4.2 Parse Log Input
 
@@ -124,34 +124,33 @@ ledger log "coding 25m"
 
 Tasks:
 
-- [ ] Separate activity text
-- [ ] Extract minutes value
-- [ ] Remove `m` suffix
-- [ ] Convert minutes to integer
-- [ ] Validate minutes > 0
+- [x] Separate activity text
+- [x] Extract minutes value
+- [x] Remove `m` suffix
+- [x] Convert minutes to integer
+- [x] Validate minutes > 0
 
 ## 4.3 Verify Initialization
 
-- [ ] Ensure state file exists
-- [ ] If not:
-
-  - [ ] Print initialization message
-  - [ ] Exit
+- [x] Ensure state file exists
+- [x] If not:
+  - [x] Print initialization message
+  - [x] Exit
 
 ## 4.4 Load Current State
 
-- [ ] Load rank
-- [ ] Load xp
-- [ ] Load focus
-- [ ] Load items
+- [x] Load rank
+- [x] Load xp
+- [x] Load focus
+- [x] Load items
 
 ## 4.5 Update XP
 
-- [ ] Define rule: `xp += minutes`
+- [x] Define rule: `xp += minutes`
 
 ## 4.6 Update Rank
 
-- [ ] Define rank formula
+- [x] Define rank formula
 
 Example:
 

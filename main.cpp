@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <filesystem>
+#include <cmath>
 
 std::string get_config_home()
 {
@@ -13,6 +14,18 @@ std::string get_config_home()
         return std::string(home) + "/.config";
 
     return "";
+}
+
+std::filesystem::path state_path()
+{
+    std::string base = get_config_home();
+    if (base.empty())
+        return {};
+
+    std::filesystem::path dir = std::filesystem::path(base) / "ledger";
+    std::filesystem::create_directories(dir);
+
+    return dir / "ledger.state";
 }
 
 bool load_state(int *rank, int *xp, int *focus, int *items)
@@ -62,16 +75,21 @@ bool load_state(int *rank, int *xp, int *focus, int *items)
     return true;
 }
 
-std::filesystem::path state_path()
+void write_state(int rank, int xp, int focus, int items)
 {
-    std::string base = get_config_home();
-    if (base.empty())
-        return {};
+    std::filesystem::path file = state_path();
 
-    std::filesystem::path dir = std::filesystem::path(base) / "ledger";
-    std::filesystem::create_directories(dir);
+    std::ofstream out(file);
+    if (!out)
+    {
+        std::cerr << "Failed to write state file\n";
+        return;
+    }
 
-    return dir / "ledger.state";
+    out << "Rank=" << rank << "\n";
+    out << "XP=" << xp << "\n";
+    out << "Focus=" << focus << "\n";
+    out << "Items=" << items << "\n";
 }
 
 void init()
@@ -131,7 +149,45 @@ void log(int argc, char *argv[])
     {
         std::cerr << "too many actvities. please log one at a time.\n";
     }
+
     std::string entry = argv[2];
+
+    size_t pos = entry.find(' ');
+    if (pos == std::string::npos)
+    {
+        std::cerr << "Invalid log entry format\n";
+        std::cerr << "usage: ledger log \"activity 25m\"\n";
+        return;
+    }
+
+    std::string act = entry.substr(0, pos);
+    int value = std::stoi(entry.substr(pos + 1, -1));
+    char unit = entry.back();
+    if (unit == 'm')
+    {
+        value = value * 60; // convert minutes to seconds
+    }
+    else if (unit == 'h')
+    {
+        value = value * 3600; // convert hours to seconds
+    }
+    else if (unit != 's')
+    {
+        std::cerr << "Invalid time unit. Use 's' for seconds, 'm' for minutes, or 'h' for hours.\n";
+        return;
+    }
+
+    int rank, xp, focus, items;
+    if (!load_state(&rank, &xp, &focus, &items))
+    {
+        std::cerr << "Ledger not initialised!\n";
+        std::cerr << "Run `ledger init` first.\n";
+        return;
+    }
+    xp += value;
+    rank = 1 + floor(sqrt(xp / 50));
+    write_state(rank, xp, focus, items);
+    std::cout << "Logged activity: " << act << " for " << value << " seconds.\n";
 }
 
 int main(int argc, char *argv[])
